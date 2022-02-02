@@ -162,18 +162,22 @@ class KmeansAnimate2D():
     filename = name of the gif file, don't mention the extension
     '''
     self._animObj.save(filename, writer='pillow', fps=fps)
-  
-  def saveMP4(self, filename: str, fps=10) -> None:
-    '''
-    Saves the animation as a mp4
 
-    filename = name of the mp4 file, don't mention the extension
-    '''
-    self._animObj.save(filename+'.mp4', writer='ffmpeg', fps=fps)
+  def animate_jupyter_nb(self):
+    fig, ax = plt.subplots()
+    animObj = animation.FuncAnimation(
+      fig,  
+      self._animate, 
+      self._generatorFuncAnimate,
+      interval=500
+    )
+    from IPython.display import HTML, display
+    display(HTML(animObj.to_jshtml()))
+    self._animObj = animObj
+    plt.close()
 
 
 if __name__ == '__main__':
-  # generate random clusters of data with 3000 samples using numpy
   points = np.random.rand(50, 2)
   kmeans = KmeansAnimate2D(k=3, data=points)
   kmeans.animate()
