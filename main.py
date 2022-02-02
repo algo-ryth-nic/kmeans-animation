@@ -26,11 +26,14 @@ def assignPointsToClusters(centroids: np.ndarray, points: np.ndarray) -> np.ndar
   Assigns each point to the closest centroid
   centroids: k x d, where is k the number of clusters & d is no. of dimensions (d=2 for now)
   points: n x d, where is n the number of points & d is no. of dimensions (d=2 for now)
+  
+  RETURNS clusters: n x 1, where is n the number of points
   '''
   n = points.shape[0] # no. of points
   k = centroids.shape[0] # no. of clusters``
   clusters = np.zeros(shape=(n,)) # n x 1, where n is the number of points
 
+  # for each point, finds the distance to each centroid
   for i in range(n):
     distances = []
     for j in range(k):
@@ -73,16 +76,24 @@ def kmeans(k: int, points: np.ndarray) -> np.ndarray:
     newCentroids = optimizeCentroids(old_centroids, points, clusters)
   return centroids, clusters
 
-def generatorFuncAnimate(k, points):
+def generatorFuncAnimate(k, points, initialCentroids=None):
   '''
   Animates the kmeans algorithm
   i: current iteration
-  points: n x d, where is n the number of points & d is no. of dimensions (d=2 for now)
-  centroids: k x d, where is k the number of clusters & d is no. of dimensions (d=2 for now)
+  points: n x d, where is n the number of points & d is no. of dimensions 
+  centroids: k x d, where is k the number of clusters & d is no. of dimensions 
   clusters: assigned to clusters to points
-  colors: matplotlib color map
+  
+  initialCentroids (optional) = k x d, where is k the number of clusters & d is no. of dimensions 
   '''
-  centroids = initializeCentroids(k, points)
+
+  if initialCentroids is None:
+    centroids = initializeCentroids(k, points)
+  elif initialCentroids.shape[0] != k:
+    RuntimeError('initialCentroids shape != k')
+  else:
+    centroids = initialCentroids
+
   clusters = assignPointsToClusters(centroids, points)
   newCentroids = optimizeCentroids(centroids, points, clusters)
   
@@ -110,9 +121,6 @@ def animate(generatorFuncData) -> None:
   colors: matplotlib color map
   '''
   (centroids, clusters, points, i) = generatorFuncData 
-  n = points.shape[0] # no. of points
-  k = centroids.shape[0] # no. of clusters
-  # colors = np.array()
   plt.cla()
   plt.scatter(points[:, 0], points[:, 1], c=clusters, s=100, cmap='jet', marker='x')
   plt.scatter(centroids[:, 0], centroids[:, 1], c='black', s=25)
@@ -129,4 +137,4 @@ animObj = animation.FuncAnimation(
     repeat=True, 
     interval=500
     )
-animObj.save('kmeans.gif', writer='imagemagick', fps=2)
+animObj.save('kmeans.gif', writer='pillow', fps=2)
