@@ -63,7 +63,14 @@ def optimizeCentroids(centroids: np.ndarray, points: np.ndarray, clusters: np.nd
 
 
 class KmeansAnimate2D():
-  def __init__(self, k: int, data: np.ndarray, startCentroids=None):
+  def __init__(self, k: int, data: np.ndarray, startCentroids=None, columns:list=None, lables:list=None):
+    """
+    k: no. of clusters
+    data: n x 2, n: number of points
+    startCentroids (optional) = k x 2, k: number of clusters 
+    columns (optional) = list of strings, x and y axis labels (length 2)
+    lables (optional) = list of strings, labels for each cluster, order should match centroids
+    """
     self.k = k
     
     # 2d data allowed for now 
@@ -75,6 +82,8 @@ class KmeansAnimate2D():
 
     self.points = data
     self.initialCentroids = startCentroids
+    self.columns = columns
+    self.cluster_lables = lables
 
   def _generatorFuncAnimate(self):
     '''
@@ -109,7 +118,7 @@ class KmeansAnimate2D():
       iterations += 1
       yield centroids, clusters, iterations
 
-  def _animate(self, generatorFuncData) -> None:
+  def _animate(self, generatorFuncData,) -> None:
     '''
     Animates the kmeans algorithm
     i: current iteration
@@ -119,12 +128,21 @@ class KmeansAnimate2D():
     '''
     (centroids, clusters, i) = generatorFuncData 
     points = self.points
+    
     plt.cla()
-    plt.scatter(points[:, 0], points[:, 1], c=clusters, s=75, cmap='jet', marker='x')
+    cluster_scatter = plt.scatter(points[:, 0], points[:, 1], c=clusters, s=75, cmap='jet', marker='x')
     plt.scatter(centroids[:, 0], centroids[:, 1], edgecolors="black", c=assignPointsToClusters(centroids, centroids), cmap='jet', s=50)
+    
+    if not self.columns == None and len(self.columns) == 2 :
+      plt.xlabel(self.columns[0])
+      plt.ylabel(self.columns[1])
+    
+    if not self.cluster_lables == None and len(self.cluster_lables) == self.k :
+      plt.legend(handles=cluster_scatter.legend_elements()[0], labels=self.cluster_lables)
+
     plt.title(f'Iteration: {i}\nK: {self.k}')
 
-  def animate(self, interval=500):
+  def animate(self, interval=500) -> None:
     fig, ax = plt.subplots()
     animObj = animation.FuncAnimation(
       fig,  
@@ -132,6 +150,7 @@ class KmeansAnimate2D():
       self._generatorFuncAnimate,
       interval=interval
     )
+    
     self._animObj = animObj
     plt.show()
 
