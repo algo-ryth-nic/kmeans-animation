@@ -62,9 +62,17 @@ def optimizeCentroids(centroids: np.ndarray, points: np.ndarray, clusters: np.nd
   return newCentroids
 
 
-class KmeansAnimate():
+class KmeansAnimate2D():
   def __init__(self, k: int, data: np.ndarray, startCentroids=None):
     self.k = k
+    
+    # 2d data allowed for now 
+    if data.shape[1] != 2:
+      raise RuntimeError('data must be of shape n x 2')
+    
+    if not isinstance(data, np.ndarray):
+      raise RuntimeError('data must be of type numpy.ndarray')
+
     self.points = data
     self.initialCentroids = startCentroids
 
@@ -107,7 +115,7 @@ class KmeansAnimate():
     i: current iteration
     points: n x d
     centroids: k x d
-    clusters: assigned to clusters to points
+    clusters: assigned clusters for points
     '''
     (centroids, clusters, i) = generatorFuncData 
     points = self.points
@@ -116,13 +124,37 @@ class KmeansAnimate():
     plt.scatter(centroids[:, 0], centroids[:, 1], edgecolors="black", c=assignPointsToClusters(centroids, centroids), cmap='jet', s=50)
     plt.title(f'Iteration: {i}\nK: {self.k}')
 
-  def animate(self):
+  def animate(self, interval=500):
     fig, ax = plt.subplots()
     animObj = animation.FuncAnimation(
       fig,  
       self._animate, 
       self._generatorFuncAnimate,
-      interval=500
+      interval=interval
     )
+    self._animObj = animObj
+    plt.show()
 
-    animObj.save('kmeans.gif', writer='pillow', fps=5)
+
+  def saveGIF(self, filename: str, fps=10) -> None:
+    '''
+    Saves the animation as a gif
+
+    filename = name of the gif file, don't mention the extension
+    '''
+    self._animObj.save(filename, writer='pillow', fps=fps)
+  
+  def saveMP4(self, filename: str, fps=10) -> None:
+    '''
+    Saves the animation as a mp4
+
+    filename = name of the mp4 file, don't mention the extension
+    '''
+    self._animObj.save(filename+'.mp4', writer='ffmpeg', fps=fps)
+
+
+if __name__ == '__main__':
+  # generate random clusters of data with 3000 samples using numpy
+  points = np.random.rand(50, 2)
+  kmeans = KmeansAnimate2D(k=3, data=points)
+  kmeans.animate()
