@@ -161,7 +161,7 @@ class KmeansAnimate2D():
 
     filename = name of the gif file, don't mention the extension
     '''
-    self._animObj.save(filename, writer='pillow', fps=fps)
+    self._animObj.save(filename+'.gif', writer='pillow', fps=fps)
 
   def animate_jupyter_nb(self):
     fig, ax = plt.subplots()
