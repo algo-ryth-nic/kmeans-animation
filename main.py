@@ -61,6 +61,36 @@ def optimizeCentroids(centroids: np.ndarray, points: np.ndarray, clusters: np.nd
     newCentroids[i, :] = np.mean(pointsInCluster, axis=0)
   return newCentroids
 
+def generateClusters(n_points, n_clusters, points_range = [1.0, 20.0], std = 1) -> np.ndarray:
+  """
+    n_points: number of points
+    n_clusters: number of clusters the points are distributed in
+    points_range (Optional) : range in which points lie [default = 1.0 --> 20.0]
+    * Due to randomeness points may lie outside the given range +/- std devation
+    std (Optional): standard devation used for normal curve [default = 1]
+    """
+  # Choose center points of clusters from the range given
+  centers = np.random.uniform(points_range[0], points_range[1],size=(n_clusters,2))
+
+  # Initialize empty array, how many points in each cluster
+  n_points_for_centers = np.ones(n_clusters)
+  # Use floor division to equally distribute the points in clusters equally
+  n_points_for_centers.fill(n_points // n_clusters)
+  # Add points to clusters that are left
+  for i in range(n_points % n_clusters):
+    n_points_for_centers[i] += 1
+  # Convert this to int , if not gives error later  
+  n_points_for_centers = [int(i) for i in n_points_for_centers]
+
+  
+  points = []
+  for i, n in enumerate(n_points_for_centers):
+    # Generate poins on each center using normal distribution
+    points.append(centers[i] + np.random.normal(scale=std,size=(n,2)))
+  # Concatenate all generated points
+  points = np.concatenate(points)
+
+  return points
 
 class KmeansAnimate2D():
   def __init__(self, k: int, data: np.ndarray, startCentroids=None, columns:list=None, lables:list=None):
@@ -178,6 +208,6 @@ class KmeansAnimate2D():
 
 
 if __name__ == '__main__':
-  points = np.random.rand(50, 2)
+  points = generateClusters(50, 3)
   kmeans = KmeansAnimate2D(k=3, data=points)
   kmeans.animate()
